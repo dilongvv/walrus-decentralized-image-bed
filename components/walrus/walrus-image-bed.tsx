@@ -23,7 +23,11 @@ import {
 import { readUploadHistory, saveUploadRecord, updateUploadRecord } from "@/lib/history";
 import type { UploadPhase, UploadRecord } from "@/lib/types";
 import { getErrorMessage } from "@/lib/utils";
-import { extendWalrusBlobStorage, uploadFileToWalrus } from "@/lib/walrus";
+import {
+  buildWalrusFileUrls,
+  extendWalrusBlobStorage,
+  uploadFileToWalrus
+} from "@/lib/walrus";
 
 export function WalrusImageBed() {
   const account = useCurrentAccount();
@@ -133,6 +137,12 @@ export function WalrusImageBed() {
       });
 
       const record: UploadRecord = {
+        ...buildWalrusFileUrls({
+          network,
+          resourceId: uploaded.quiltId ?? uploaded.blobId,
+          isQuiltPatch: Boolean(uploaded.quiltId),
+          identifier: selectedFile.name
+        }),
         id: crypto.randomUUID(),
         blobId: uploaded.blobId,
         blobObjectId: uploaded.blobObjectId,
@@ -142,9 +152,14 @@ export function WalrusImageBed() {
         fileSize: selectedFile.size,
         uploadedAt: new Date().toISOString(),
         network,
-        shareUrl: uploaded.shareUrl,
-        aggregatorUrl: uploaded.aggregatorUrl,
-        previewUrl: isSelectedImage ? uploaded.aggregatorUrl : undefined,
+        previewUrl: isSelectedImage
+          ? buildWalrusFileUrls({
+              network,
+              resourceId: uploaded.quiltId ?? uploaded.blobId,
+              isQuiltPatch: Boolean(uploaded.quiltId),
+              identifier: selectedFile.name
+            }).aggregatorUrl
+          : undefined,
         proof: {
           registerDigest: uploaded.registerDigest,
           certifyDigest: uploaded.certifyDigest,

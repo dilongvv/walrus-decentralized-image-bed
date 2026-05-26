@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UploadRecord } from "@/lib/types";
+import { buildWalrusFileUrls } from "@/lib/walrus";
 import { formatBytes } from "@/lib/utils";
 
 type HistoryListProps = {
@@ -36,46 +37,55 @@ export function HistoryList({ records, isLoading, onSelect }: HistoryListProps) 
         </div>
       ) : (
         <div className="space-y-3">
-          {records.map((record) => (
-            <button
-              key={record.id}
-              type="button"
-              className="w-full rounded-md border border-white/10 bg-background/65 p-3 text-left transition hover:border-primary/50 hover:bg-background"
-              onClick={() => onSelect(record)}
-            >
-              <div className="flex gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
-                  {record.previewUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={record.previewUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{record.fileName}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {formatBytes(record.fileSize)} · {new Date(record.uploadedAt).toLocaleString()}
+          {records.map((record) => {
+            const resolvedUrls = buildWalrusFileUrls({
+              network: record.network,
+              resourceId: record.quiltId ?? record.blobId,
+              isQuiltPatch: Boolean(record.quiltId),
+              identifier: record.fileName
+            });
+
+            return (
+              <button
+                key={record.id}
+                type="button"
+                className="w-full rounded-md border border-white/10 bg-background/65 p-3 text-left transition hover:border-primary/50 hover:bg-background"
+                onClick={() => onSelect(record)}
+              >
+                <div className="flex gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
+                    {record.fileType.startsWith("image/") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={resolvedUrls.aggregatorUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                    )}
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <Badge variant="outline">{record.network}</Badge>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7"
-                      asChild
-                      onClick={(event) => event.stopPropagation()}
-                      aria-label="Open share link"
-                    >
-                      <a href={record.shareUrl} target="_blank" rel="noreferrer">
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    </Button>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{record.fileName}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {formatBytes(record.fileSize)} · {new Date(record.uploadedAt).toLocaleString()}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant="outline">{record.network}</Badge>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        asChild
+                        onClick={(event) => event.stopPropagation()}
+                        aria-label="Open share link"
+                      >
+                        <a href={resolvedUrls.shareUrl} target="_blank" rel="noreferrer">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
     </aside>

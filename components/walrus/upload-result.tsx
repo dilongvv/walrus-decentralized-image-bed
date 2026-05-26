@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CANONICAL_AGGREGATOR_BASE } from "@/lib/constants";
 import type { UploadRecord } from "@/lib/types";
+import { buildWalrusFileUrls } from "@/lib/walrus";
 import { formatBytes, getErrorMessage } from "@/lib/utils";
 
 type UploadResultProps = {
@@ -37,13 +37,18 @@ export function UploadResult({
   if (!record) return null;
 
   const currentRecord = record;
-
-  const downloadUrl = `${CANONICAL_AGGREGATOR_BASE[currentRecord.network]}/v1/blobs/${currentRecord.blobId}`;
+  const resourceId = currentRecord.quiltId ?? currentRecord.blobId;
+  const resolvedUrls = buildWalrusFileUrls({
+    network: currentRecord.network,
+    resourceId,
+    isQuiltPatch: Boolean(currentRecord.quiltId),
+    identifier: currentRecord.fileName
+  });
 
   async function handleDownload() {
     try {
       setIsDownloading(true);
-      const response = await fetch(downloadUrl);
+      const response = await fetch(resolvedUrls.aggregatorUrl);
       if (!response.ok) {
         throw new Error(`Download failed with status ${response.status}.`);
       }
@@ -86,12 +91,12 @@ export function UploadResult({
           Download
         </Button>
         <Button variant="outline" asChild>
-          <a href={downloadUrl} target="_blank" rel="noreferrer">
+          <a href={resolvedUrls.aggregatorUrl} target="_blank" rel="noreferrer">
             <ExternalLink className="h-4 w-4" />
-            Open Raw
+            Open Link
           </a>
         </Button>
-        <Button variant="secondary" onClick={() => onCopy(record.shareUrl)}>
+        <Button variant="secondary" onClick={() => onCopy(resolvedUrls.shareUrl)}>
           <Copy className="h-4 w-4" />
           Copy Share Link
         </Button>
@@ -99,19 +104,28 @@ export function UploadResult({
 
       <div className="space-y-3">
         <InfoRow label="Blob ID" value={record.blobId} onCopy={onCopy} />
-        <InfoRow label="Share Link" value={record.shareUrl} href={record.shareUrl} onCopy={onCopy} />
+        <InfoRow
+          label="Share Link"
+          value={resolvedUrls.shareUrl}
+          href={resolvedUrls.shareUrl}
+          onCopy={onCopy}
+        />
         <InfoRow
           label="Aggregator"
-          value={record.aggregatorUrl}
-          href={record.aggregatorUrl}
+          value={resolvedUrls.aggregatorUrl}
+          href={resolvedUrls.aggregatorUrl}
           onCopy={onCopy}
         />
       </div>
 
-      {record.previewUrl ? (
+      {record.fileType.startsWith("image/") ? (
         <div className="mt-5 overflow-hidden rounded-md border border-white/10 bg-background">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={record.previewUrl} alt={record.fileName} className="max-h-[360px] w-full object-contain" />
+          <img
+            src={resolvedUrls.aggregatorUrl}
+            alt={record.fileName}
+            className="max-h-[360px] w-full object-contain"
+          />
         </div>
       ) : null}
 

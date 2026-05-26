@@ -40,11 +40,35 @@ export function createWalrusClient(network: WalrusNetwork) {
 }
 
 export function buildWalrusUrls(blobId: string, network: WalrusNetwork) {
-  const config = NETWORKS[network];
+  const aggregatorUrl = `${CANONICAL_AGGREGATOR_BASE[network]}/v1/blobs/${blobId}`;
 
   return {
-    shareUrl: `${config.directWalAppBase}/${blobId}`,
-    aggregatorUrl: `${CANONICAL_AGGREGATOR_BASE[network]}/v1/blobs/${blobId}`
+    shareUrl: aggregatorUrl,
+    aggregatorUrl
+  };
+}
+
+export function buildWalrusFileUrls({
+  network,
+  resourceId,
+  isQuiltPatch = false,
+  identifier
+}: {
+  network: WalrusNetwork;
+  resourceId: string;
+  isQuiltPatch?: boolean;
+  identifier?: string;
+}) {
+  const aggregatorPath = isQuiltPatch
+    ? `/v1/blobs/by-quilt-patch-id/${resourceId}`
+    : identifier
+      ? `/v1/blobs/by-quilt-id/${resourceId}/${encodeURIComponent(identifier)}`
+      : `/v1/blobs/${resourceId}`;
+  const aggregatorUrl = `${CANONICAL_AGGREGATOR_BASE[network]}${aggregatorPath}`;
+
+  return {
+    shareUrl: aggregatorUrl,
+    aggregatorUrl
   };
 }
 
