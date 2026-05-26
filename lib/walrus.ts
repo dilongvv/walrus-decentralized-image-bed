@@ -1,7 +1,12 @@
 "use client";
 
 import type { Transaction } from "@mysten/sui/transactions";
-import { DEFAULT_EPOCHS, NETWORKS, type WalrusNetwork } from "@/lib/constants";
+import {
+  DEFAULT_EPOCHS,
+  NETWORKS,
+  WALRUS_RELAY_TIP_MAX,
+  type WalrusNetwork
+} from "@/lib/constants";
 
 export type SignAndExecute = (input: { transaction: Transaction }) => Promise<unknown>;
 
@@ -22,7 +27,7 @@ export function createWalrusClient(network: WalrusNetwork) {
           uploadRelay: {
             host: config.uploadRelayUrl,
             sendTip: {
-              max: 1_000
+              max: WALRUS_RELAY_TIP_MAX
             }
           },
           storageNodeClientOptions: {

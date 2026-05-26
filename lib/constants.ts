@@ -56,3 +56,7 @@ export const DEFAULT_NETWORK: WalrusNetwork =
   process.env.NEXT_PUBLIC_SUI_NETWORK === "mainnet" ? "mainnet" : "testnet";
 
 export const DEFAULT_EPOCHS = Number(process.env.NEXT_PUBLIC_WALRUS_EPOCHS ?? 3);
+
+export const WALRUS_RELAY_TIP_MAX = Number(
+  process.env.NEXT_PUBLIC_WALRUS_RELAY_TIP_MAX ?? 10_000_000
+);
