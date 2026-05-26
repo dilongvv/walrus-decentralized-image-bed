@@ -1,0 +1,6 @@
+[package]
+name = "walrus_image_bed_registry"
+edition = "2024.beta"
+
+[addresses]
+walrus_image_bed_registry = "0x0"

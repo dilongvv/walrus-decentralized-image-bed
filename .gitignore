@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+dist
+.env
+.env*.local
+*.log
+public/*.wasm
+tsconfig.tsbuildinfo
+sui/build
