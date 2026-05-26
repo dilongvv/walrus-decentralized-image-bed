@@ -1,5 +1,6 @@
 "use client";
 
+import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { CheckCircle2, ExternalLink, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,26 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
   const ids = REGISTRY_IDS[network];
   const hasProfile = isConfigured(ids.appProfileId);
   const hasPackage = isConfigured(ids.packageId);
+
+  const profileQuery = useSuiClientQuery(
+    "getObject",
+    {
+      id: ids.appProfileId ?? "",
+      options: {
+        showContent: true
+      }
+    },
+    {
+      enabled: hasProfile && Boolean(ids.appProfileId),
+      staleTime: 30_000
+    }
+  );
+
+  const profileFields = extractProfileFields(profileQuery.data);
+  const developerWallet = profileFields?.developer ?? DEVELOPER_WALLET;
+  const website = profileFields?.website_url ?? PROJECT_WEBSITE;
+  const github = profileFields?.github_url ?? PROJECT_GITHUB;
+  const suins = profileFields?.suins_name ?? DEVELOPER_SUINS;
 
   return (
     <section className="rounded-lg border border-white/10 bg-card/75 p-4 shadow-glow sm:p-5">
@@ -42,12 +63,12 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
       <div className="grid gap-3 md:grid-cols-2">
         <IdentityRow
           label="Developer wallet"
-          value={shortenAddress(DEVELOPER_WALLET)}
-          href={explorerUrl({ type: "address", id: DEVELOPER_WALLET, network })}
+          value={shortenAddress(developerWallet)}
+          href={explorerUrl({ type: "address", id: developerWallet, network })}
         />
-        <IdentityRow label="SuiNS" value={DEVELOPER_SUINS} />
-        <IdentityRow label="Website" value={PROJECT_WEBSITE} href={PROJECT_WEBSITE} />
-        <IdentityRow label="GitHub" value={PROJECT_GITHUB} href={PROJECT_GITHUB} />
+        <IdentityRow label="SuiNS" value={suins} />
+        <IdentityRow label="Website" value={website} href={website} />
+        <IdentityRow label="GitHub" value={github} href={github} />
         <IdentityRow
           label="Registry package"
           value={hasPackage ? shortenAddress(ids.packageId) : "Publish pending"}
@@ -68,6 +89,10 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
         />
       </div>
 
+      {profileQuery.isFetching ? (
+        <p className="mt-3 text-xs text-muted-foreground">Refreshing on-chain profile data...</p>
+      ) : null}
+
       <div className="mt-4 flex items-start gap-2 rounded-md border border-white/10 bg-background/70 p-3 text-xs leading-5 text-muted-foreground">
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <span>
@@ -78,6 +103,34 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
       </div>
     </section>
   );
+}
+
+function extractProfileFields(data: unknown) {
+  if (!data || typeof data !== "object") return null;
+
+  const object = data as {
+    data?: {
+      content?: {
+        fields?: Record<string, unknown>;
+      };
+    };
+  };
+
+  const fields = object.data?.content?.fields;
+  if (!fields) return null;
+
+  return {
+    developer:
+      typeof fields.developer === "string" && fields.developer.trim() ? fields.developer : undefined,
+    website_url:
+      typeof fields.website_url === "string" && fields.website_url.trim()
+        ? fields.website_url
+        : undefined,
+    github_url:
+      typeof fields.github_url === "string" && fields.github_url.trim() ? fields.github_url : undefined,
+    suins_name:
+      typeof fields.suins_name === "string" && fields.suins_name.trim() ? fields.suins_name : undefined
+  };
 }
 
 function IdentityRow({
