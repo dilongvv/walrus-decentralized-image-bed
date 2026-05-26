@@ -20,10 +20,10 @@ import {
   NETWORKS,
   type WalrusNetwork
 } from "@/lib/constants";
-import { readUploadHistory, saveUploadRecord } from "@/lib/history";
+import { readUploadHistory, saveUploadRecord, updateUploadRecord } from "@/lib/history";
 import type { UploadPhase, UploadRecord } from "@/lib/types";
 import { getErrorMessage } from "@/lib/utils";
-import { uploadFileToWalrus } from "@/lib/walrus";
+import { extendWalrusBlobStorage, uploadFileToWalrus } from "@/lib/walrus";
 
 export function WalrusImageBed() {
   const account = useCurrentAccount();
@@ -41,6 +41,8 @@ export function WalrusImageBed() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [extendEpochs, setExtendEpochs] = useState(DEFAULT_EPOCHS);
+  const [isExtending, setIsExtending] = useState(false);
 
   const isSelectedImage = useMemo(
     () => Boolean(selectedFile?.type.startsWith("image/")),
@@ -133,6 +135,7 @@ export function WalrusImageBed() {
       const record: UploadRecord = {
         id: crypto.randomUUID(),
         blobId: uploaded.blobId,
+        blobObjectId: uploaded.blobObjectId,
         quiltId: uploaded.quiltId,
         fileName: selectedFile.name,
         fileType: selectedFile.type || "application/octet-stream",
@@ -146,6 +149,9 @@ export function WalrusImageBed() {
           registerDigest: uploaded.registerDigest,
           certifyDigest: uploaded.certifyDigest,
           epochs: DEFAULT_EPOCHS,
+          startEpoch: uploaded.storage?.start_epoch,
+          endEpoch: uploaded.storage?.end_epoch,
+          storageSize: uploaded.storage?.storage_size,
           deletable: true,
           relayHost: uploaded.relayHost
         }
@@ -167,6 +173,61 @@ export function WalrusImageBed() {
       setPhase("error");
       setError(getErrorMessage(err));
       setStatusText("Upload failed");
+    }
+  }
+
+  async function handleExtendStorage(record: UploadRecord, epochs: number) {
+    if (!account?.address) {
+      setError("Connect your Sui wallet first. Extending storage needs a wallet signature.");
+      return;
+    }
+
+    if (record.network !== network) {
+      setError(`Switch to ${NETWORKS[record.network].label} before extending this upload.`);
+      return;
+    }
+
+    if (!record.blobObjectId) {
+      setError("This upload record does not include a Walrus blob object ID, so it cannot be extended.");
+      return;
+    }
+
+    if (!Number.isFinite(epochs) || epochs < 1) {
+      setError("Enter at least 1 epoch to extend storage.");
+      return;
+    }
+
+    try {
+      setIsExtending(true);
+      setError(null);
+      setNotice(null);
+
+      const extended = await extendWalrusBlobStorage({
+        blobObjectId: record.blobObjectId,
+        network,
+        epochs,
+        signAndExecute: signAndExecuteTransaction
+      });
+
+      const nextRecord: UploadRecord = {
+        ...record,
+        proof: {
+          ...record.proof,
+          extendDigest: extended.digest,
+          extendedByEpochs: (record.proof.extendedByEpochs ?? 0) + epochs,
+          startEpoch: extended.storage.start_epoch,
+          endEpoch: extended.storage.end_epoch,
+          storageSize: extended.storage.storage_size
+        }
+      };
+
+      setActiveRecord(nextRecord);
+      setRecords(updateUploadRecord(nextRecord));
+      setNotice(`Storage extended by ${epochs} epoch${epochs === 1 ? "" : "s"}.`);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsExtending(false);
     }
   }
 
@@ -204,7 +265,14 @@ export function WalrusImageBed() {
               onClear={clearFile}
               onUpload={handleUpload}
             />
-            <UploadResult record={activeRecord} onCopy={copyToClipboard} />
+            <UploadResult
+              record={activeRecord}
+              onCopy={copyToClipboard}
+              onExtend={handleExtendStorage}
+              extendEpochs={extendEpochs}
+              onExtendEpochsChange={(epochs) => setExtendEpochs(Math.max(1, Math.floor(epochs || 1)))}
+              isExtending={isExtending}
+            />
           </div>
 
           <HistoryList

@@ -27,3 +27,14 @@ export function saveUploadRecord(record: UploadRecord) {
   window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
   return next;
 }
+
+export function updateUploadRecord(record: UploadRecord) {
+  if (typeof window === "undefined") return [];
+
+  const next = readUploadHistory().map((item) =>
+    item.id === record.id || item.blobId === record.blobId ? record : item
+  );
+
+  window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+  return next;
+}

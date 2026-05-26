@@ -12,6 +12,7 @@ export type UploadPhase =
 export type UploadRecord = {
   id: string;
   blobId: string;
+  blobObjectId?: string;
   quiltId?: string | null;
   fileName: string;
   fileType: string;
@@ -24,7 +25,12 @@ export type UploadRecord = {
   proof: {
     registerDigest?: string;
     certifyDigest?: string;
+    extendDigest?: string;
     epochs: number;
+    extendedByEpochs?: number;
+    startEpoch?: number;
+    endEpoch?: number;
+    storageSize?: string;
     deletable: boolean;
     relayHost: string;
   };

@@ -135,7 +135,20 @@ export async function uploadFileToWalrus({
 
   const certifyDigest = extractTransactionDigest(certifyResult);
   const files = await flow.listFiles();
-  const firstFile = files[0] as { blobId?: string; id?: string } | undefined;
+  const firstFile = files[0] as
+    | {
+        blobId?: string;
+        id?: string;
+        blobObject?: {
+          id?: string;
+          storage?: {
+            start_epoch?: number;
+            end_epoch?: number;
+            storage_size?: string;
+          };
+        };
+      }
+    | undefined;
   const blobId = firstFile?.blobId ?? encodedBlobId;
 
   if (!blobId) {
@@ -146,10 +159,45 @@ export async function uploadFileToWalrus({
 
   return {
     blobId,
+    blobObjectId: firstFile?.blobObject?.id,
     quiltId: firstFile?.id,
     registerDigest,
     certifyDigest,
+    storage: firstFile?.blobObject?.storage,
     relayHost: config.uploadRelayUrl,
     ...buildWalrusUrls(blobId, network)
+  };
+}
+
+export async function extendWalrusBlobStorage({
+  blobObjectId,
+  network,
+  epochs,
+  signAndExecute
+}: {
+  blobObjectId: string;
+  network: WalrusNetwork;
+  epochs: number;
+  signAndExecute: SignAndExecute;
+}) {
+  const client = await createWalrusClient(network);
+  const tx = await client.walrus.extendBlobTransaction({
+    blobObjectId,
+    epochs
+  });
+
+  const result = await signAndExecute({ transaction: tx });
+  assertWalletResult(result, "Storage extension");
+
+  const digest = extractTransactionDigest(result);
+  if (!digest) {
+    throw new Error("Wallet did not return an extension transaction digest.");
+  }
+
+  const blobObject = await client.walrus.getBlobObject(blobObjectId);
+
+  return {
+    digest,
+    storage: blobObject.storage
   };
 }

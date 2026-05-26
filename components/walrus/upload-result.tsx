@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Copy, ExternalLink, FileCheck2 } from "lucide-react";
+import { CheckCircle2, Copy, ExternalLink, FileCheck2, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { UploadRecord } from "@/lib/types";
@@ -9,9 +9,20 @@ import { formatBytes } from "@/lib/utils";
 type UploadResultProps = {
   record: UploadRecord | null;
   onCopy: (value: string) => void;
+  onExtend: (record: UploadRecord, epochs: number) => void;
+  extendEpochs: number;
+  onExtendEpochsChange: (epochs: number) => void;
+  isExtending: boolean;
 };
 
-export function UploadResult({ record, onCopy }: UploadResultProps) {
+export function UploadResult({
+  record,
+  onCopy,
+  onExtend,
+  extendEpochs,
+  onExtendEpochsChange,
+  isExtending
+}: UploadResultProps) {
   if (!record) return null;
 
   return (
@@ -52,12 +63,59 @@ export function UploadResult({ record, onCopy }: UploadResultProps) {
         <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
           <span>Register TX: {record.proof.registerDigest ?? "N/A"}</span>
           <span>Certify TX: {record.proof.certifyDigest ?? "N/A"}</span>
-          <span>Epochs: {record.proof.epochs}</span>
+          <span>Initial epochs: {record.proof.epochs}</span>
+          <span>Extended epochs: {record.proof.extendedByEpochs ?? 0}</span>
+          <span>End epoch: {record.proof.endEpoch ?? "N/A"}</span>
+          <span>Blob object: {record.blobObjectId ?? "N/A"}</span>
           <span>Relay: {record.proof.relayHost}</span>
+          <span>Last extend TX: {record.proof.extendDigest ?? "N/A"}</span>
         </div>
         <Badge variant="outline" className="mt-3">
           {record.proof.deletable ? "Deletable blob" : "Permanent blob"}
         </Badge>
+      </div>
+
+      <div className="mt-5 rounded-md border border-white/10 bg-background/70 p-4">
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+          <RefreshCw className="h-4 w-4 text-primary" />
+          Extend Storage
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="grid gap-1 text-sm">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Additional epochs</span>
+            <input
+              type="number"
+              min={1}
+              max={365}
+              value={extendEpochs}
+              onChange={(event) => onExtendEpochsChange(Number(event.target.value))}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none ring-offset-background focus:ring-2 focus:ring-ring sm:w-44"
+            />
+          </label>
+          <Button
+            type="button"
+            disabled={isExtending || !record.blobObjectId}
+            onClick={() => onExtend(record, extendEpochs)}
+            className="sm:mb-0"
+          >
+            {isExtending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Extend
+          </Button>
+        </div>
+        {!record.blobObjectId ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            This older local record does not include a Walrus blob object ID, so it cannot be
+            extended from history.
+          </p>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Extending requires wallet approval and consumes WAL for the additional storage period.
+          </p>
+        )}
       </div>
     </section>
   );
