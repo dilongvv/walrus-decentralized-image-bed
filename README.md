@@ -1,5 +1,50 @@
 # Walrus Decentralized Image Bed
 
+A production-ready Walrus image bed and file sharing app built on Sui and Walrus.
+
+- Live app: https://walrus-decentralized-image-bed.vercel.app
+- GitHub: https://github.com/dilongvv/walrus-decentralized-image-bed
+- Developer wallet: `0xbbc8f3deb39954974cd4556cd81579429ceb32d7a01d66570ce3d3d542c37b69`
+- Mainnet Registry package: `0x01595e8774c136091eb12b6b12c0a363a62a53f3fcc028c34a25fffe7dcdb85d`
+- Mainnet AppProfile object: `0x9091fbc8163b16662883d5ef1daac136eca48d0aa00a6865dc6fa1eb7465bced`
+
+This project gives users a simple browser-based way to upload images and common files to Walrus with a Sui wallet, get back a shareable link, preview images, inspect storage proof details, and locally track recent uploads. It also includes an on-chain Sui Registry identity package so the app, repository, website, and developer wallet are easy to verify on chain.
+
+## What This Project Does
+
+- Uploads images and common files to Walrus through the browser
+- Uses wallet-signed `register` and `certify` transactions on Sui
+- Supports Mainnet and Testnet switching
+- Gives users a direct file link, preview, proof metadata, and local upload history
+- Publishes a verifiable on-chain developer identity for the app itself
+
+## Why It Matters
+
+Most Walrus demos show storage primitives. This project turns those primitives into a usable end-user tool:
+
+- consumer-friendly upload flow
+- wallet-native signing
+- direct file retrieval for both blob and quilt-backed uploads
+- chain-verifiable developer identity
+- clean Vercel deployment path for fast iteration
+
+## Verification Links
+
+- Live app: https://walrus-decentralized-image-bed.vercel.app
+- GitHub repo: https://github.com/dilongvv/walrus-decentralized-image-bed
+- Mainnet package on Sui Explorer: https://suiexplorer.com/object/0x01595e8774c136091eb12b6b12c0a363a62a53f3fcc028c34a25fffe7dcdb85d?network=mainnet
+- Mainnet AppProfile on Sui Explorer: https://suiexplorer.com/object/0x9091fbc8163b16662883d5ef1daac136eca48d0aa00a6865dc6fa1eb7465bced?network=mainnet
+
+## For Sui / Walrus Reviewers
+
+If you are reviewing this project from the ecosystem, the easiest path is:
+
+1. Open the live app and connect a Sui wallet.
+2. Upload a small image on Mainnet or Testnet.
+3. Confirm the app returns a working direct file URL and preview.
+4. Open the `Verified Developer` section in the app.
+5. Verify the same developer wallet published the Registry package and owns the AdminCap / UpgradeCap path disclosed below.
+
 去中心化图床 / 文件分享工具，基于 Next.js 14 App Router、TypeScript、Tailwind CSS、Shadcn/ui 风格组件、Sui dApp Kit 和官方 `@mysten/walrus` TypeScript SDK。
 
 ## Project Structure
@@ -75,6 +120,10 @@
 - Sui dApp Kit provider docs: https://sdk.mystenlabs.com/dapp-kit/sui-client-provider
 - Relay example app requested by the spec: https://github.com/MystenLabs/walrus-sdk-relay-example-app
 - Walrus onboarding examples requested by the spec: https://github.com/MystenLabs/walrus
+
+## Launch Materials
+
+Ready-to-post outreach copy for Discord, the Sui Developer Forum, X, and Office Hours is in `LAUNCH_KIT.md`.
 
 ## Getting Started
 
