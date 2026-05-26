@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   CheckCircle2,
   Copy,
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CANONICAL_AGGREGATOR_BASE } from "@/lib/constants";
 import type { UploadRecord } from "@/lib/types";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getErrorMessage } from "@/lib/utils";
 
 type UploadResultProps = {
   record: UploadRecord | null;
@@ -32,9 +33,36 @@ export function UploadResult({
   onExtendEpochsChange,
   isExtending
 }: UploadResultProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
   if (!record) return null;
 
-  const downloadUrl = `${CANONICAL_AGGREGATOR_BASE[record.network]}/v1/blobs/${record.blobId}`;
+  const currentRecord = record;
+
+  const downloadUrl = `${CANONICAL_AGGREGATOR_BASE[currentRecord.network]}/v1/blobs/${currentRecord.blobId}`;
+
+  async function handleDownload() {
+    try {
+      setIsDownloading(true);
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`Download failed with status ${response.status}.`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = currentRecord.fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      window.alert(getErrorMessage(error));
+    } finally {
+      setIsDownloading(false);
+    }
+  }
 
   return (
     <section className="rounded-lg border border-primary/30 bg-primary/10 p-4 sm:p-5">
@@ -49,10 +77,18 @@ export function UploadResult({
       </div>
 
       <div className="mb-5 flex flex-wrap gap-2">
-        <Button asChild>
-          <a href={downloadUrl} download={record.fileName}>
+        <Button type="button" onClick={handleDownload} disabled={isDownloading}>
+          {isDownloading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
             <Download className="h-4 w-4" />
-            Download
+          )}
+          Download
+        </Button>
+        <Button variant="outline" asChild>
+          <a href={downloadUrl} target="_blank" rel="noreferrer">
+            <ExternalLink className="h-4 w-4" />
+            Open Raw
           </a>
         </Button>
         <Button variant="secondary" onClick={() => onCopy(record.shareUrl)}>
