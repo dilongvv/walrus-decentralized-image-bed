@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CANONICAL_AGGREGATOR_BASE } from "@/lib/constants";
 import type { UploadRecord } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
 
@@ -33,6 +34,8 @@ export function UploadResult({
 }: UploadResultProps) {
   if (!record) return null;
 
+  const downloadUrl = `${CANONICAL_AGGREGATOR_BASE[record.network]}/v1/blobs/${record.blobId}`;
+
   return (
     <section className="rounded-lg border border-primary/30 bg-primary/10 p-4 sm:p-5">
       <div className="mb-4 flex items-start gap-3">
@@ -47,7 +50,7 @@ export function UploadResult({
 
       <div className="mb-5 flex flex-wrap gap-2">
         <Button asChild>
-          <a href={record.aggregatorUrl} download={record.fileName}>
+          <a href={downloadUrl} download={record.fileName}>
             <Download className="h-4 w-4" />
             Download
           </a>

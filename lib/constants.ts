@@ -1,5 +1,10 @@
 export type WalrusNetwork = "testnet" | "mainnet";
 
+export const CANONICAL_AGGREGATOR_BASE: Record<WalrusNetwork, string> = {
+  testnet: "https://aggregator.walrus-testnet.walrus.space",
+  mainnet: "https://aggregator.walrus-mainnet.walrus.space"
+};
+
 export const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 export const ACCEPTED_MIME_TYPES = [
@@ -34,8 +39,7 @@ export const NETWORKS: Record<
       process.env.NEXT_PUBLIC_TESTNET_UPLOAD_RELAY ??
       "https://upload-relay.testnet.walrus.space",
     aggregatorUrl:
-      process.env.NEXT_PUBLIC_TESTNET_AGGREGATOR ??
-      "https://aggregator.testnet.walrus.space",
+      process.env.NEXT_PUBLIC_TESTNET_AGGREGATOR ?? CANONICAL_AGGREGATOR_BASE.testnet,
     directWalAppBase: "https://wal.app"
   },
   mainnet: {
@@ -46,8 +50,7 @@ export const NETWORKS: Record<
       process.env.NEXT_PUBLIC_MAINNET_UPLOAD_RELAY ??
       "https://upload-relay.mainnet.walrus.space",
     aggregatorUrl:
-      process.env.NEXT_PUBLIC_MAINNET_AGGREGATOR ??
-      "https://aggregator.mainnet.walrus.space",
+      process.env.NEXT_PUBLIC_MAINNET_AGGREGATOR ?? CANONICAL_AGGREGATOR_BASE.mainnet,
     directWalAppBase: "https://wal.app"
   }
 };

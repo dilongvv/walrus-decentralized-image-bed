@@ -2,6 +2,7 @@
 
 import type { Transaction } from "@mysten/sui/transactions";
 import {
+  CANONICAL_AGGREGATOR_BASE,
   DEFAULT_EPOCHS,
   NETWORKS,
   WALRUS_RELAY_TIP_MAX,
@@ -43,7 +44,7 @@ export function buildWalrusUrls(blobId: string, network: WalrusNetwork) {
 
   return {
     shareUrl: `${config.directWalAppBase}/${blobId}`,
-    aggregatorUrl: `${config.aggregatorUrl}/v1/blobs/${blobId}`
+    aggregatorUrl: `${CANONICAL_AGGREGATOR_BASE[network]}/v1/blobs/${blobId}`
   };
 }
 
