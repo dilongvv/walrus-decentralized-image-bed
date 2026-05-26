@@ -99,7 +99,7 @@ NEXT_PUBLIC_MAINNET_UPLOAD_RELAY=https://upload-relay.mainnet.walrus.space
 NEXT_PUBLIC_TESTNET_AGGREGATOR=https://aggregator.testnet.walrus.space
 NEXT_PUBLIC_MAINNET_AGGREGATOR=https://aggregator.mainnet.walrus.space
 NEXT_PUBLIC_DEVELOPER_WALLET=0xbbc8f3deb39954974cd4556cd81579429ceb32d7a01d66570ce3d3d542c37b69
-NEXT_PUBLIC_PROJECT_WEBSITE=https://github.com/dilongvv/walrus-decentralized-image-bed
+NEXT_PUBLIC_PROJECT_WEBSITE=https://walrus-decentralized-image-bed.vercel.app
 NEXT_PUBLIC_PROJECT_GITHUB=https://github.com/dilongvv/walrus-decentralized-image-bed
 NEXT_PUBLIC_DEVELOPER_SUINS=TBD
 NEXT_PUBLIC_SUI_EXPLORER_BASE=https://suiexplorer.com
@@ -135,6 +135,7 @@ Testnet registry:
 ```txt
 Transaction Digest: 6A7SgcHPbvuqSeT6DVJFoem97WKV9rZFwwMjcLi4GKzT
 Profile Update Digest: 8sYeLfSxES69G7xL45AKGrQZ2UsdovhaVgZqAncjzyKs
+Website Update Digest: HXzpFFiMaEd91w92umk2Qk4NtPZrF7gNFUvoPpt33h3H
 Package ID: 0xc972d197b10609c95c77519244f0290e3b057e4c9dcbfcfb1ef75eadf3e1d82c
 AppProfile Object ID: 0x07e047f13d39cc83ef9bd6c06ab03fc039ecb244dc07aae06038f85ff4ea9914
 AdminCap Object ID: 0x7c41382f85b8a5c73f1ece2575481ff66b04972733c4f78b373358b425c772ff
@@ -146,6 +147,7 @@ Mainnet registry:
 ```txt
 Transaction Digest: 9fzLADEtiCfAaaj9hBPE23wuyeSJek4otNawSzXkxaJi
 Profile Update Digest: HYE3Za3LBzfZxyjPuYNX3TE4W6Dt6cQjcjXSKwgb4CNw
+Website Update Digest: DuPNBnnTCiGoSJza5qPqvxyt6PbYKfkUjvGkuLvSWJCW
 Package ID: 0x01595e8774c136091eb12b6b12c0a363a62a53f3fcc028c34a25fffe7dcdb85d
 AppProfile Object ID: 0x9091fbc8163b16662883d5ef1daac136eca48d0aa00a6865dc6fa1eb7465bced
 AdminCap Object ID: 0x5da346646c428e37e6c3fb5eaecc5318c04992516dc54e26b8ea6f02d34606ab
