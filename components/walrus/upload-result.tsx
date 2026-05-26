@@ -1,6 +1,14 @@
 "use client";
 
-import { CheckCircle2, Copy, ExternalLink, FileCheck2, Loader2, RefreshCw } from "lucide-react";
+import {
+  CheckCircle2,
+  Copy,
+  Download,
+  ExternalLink,
+  FileCheck2,
+  Loader2,
+  RefreshCw
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { UploadRecord } from "@/lib/types";
@@ -35,6 +43,19 @@ export function UploadResult({
             {record.fileName} · {formatBytes(record.fileSize)}
           </p>
         </div>
+      </div>
+
+      <div className="mb-5 flex flex-wrap gap-2">
+        <Button asChild>
+          <a href={record.aggregatorUrl} download={record.fileName}>
+            <Download className="h-4 w-4" />
+            Download
+          </a>
+        </Button>
+        <Button variant="secondary" onClick={() => onCopy(record.shareUrl)}>
+          <Copy className="h-4 w-4" />
+          Copy Share Link
+        </Button>
       </div>
 
       <div className="space-y-3">
