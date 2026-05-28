@@ -26,6 +26,8 @@ export const NETWORKS: Record<
   {
     label: string;
     fullnodeUrl: string;
+    graphqlUrl: string;
+    grpcUrl: string;
     uploadRelayUrl: string;
     aggregatorUrl: string;
     directWalAppBase: string;
@@ -35,6 +37,12 @@ export const NETWORKS: Record<
     label: "Testnet",
     fullnodeUrl:
       process.env.NEXT_PUBLIC_TESTNET_FULLNODE ?? "https://fullnode.testnet.sui.io:443",
+    graphqlUrl:
+      process.env.NEXT_PUBLIC_TESTNET_GRAPHQL ?? "https://graphql.testnet.sui.io/graphql",
+    grpcUrl:
+      process.env.NEXT_PUBLIC_TESTNET_GRPC ??
+      process.env.NEXT_PUBLIC_TESTNET_FULLNODE ??
+      "https://fullnode.testnet.sui.io:443",
     uploadRelayUrl:
       process.env.NEXT_PUBLIC_TESTNET_UPLOAD_RELAY ??
       "https://upload-relay.testnet.walrus.space",
@@ -46,6 +54,12 @@ export const NETWORKS: Record<
     label: "Mainnet",
     fullnodeUrl:
       process.env.NEXT_PUBLIC_MAINNET_FULLNODE ?? "https://fullnode.mainnet.sui.io:443",
+    graphqlUrl:
+      process.env.NEXT_PUBLIC_MAINNET_GRAPHQL ?? "https://graphql.mainnet.sui.io/graphql",
+    grpcUrl:
+      process.env.NEXT_PUBLIC_MAINNET_GRPC ??
+      process.env.NEXT_PUBLIC_MAINNET_FULLNODE ??
+      "https://fullnode.mainnet.sui.io:443",
     uploadRelayUrl:
       process.env.NEXT_PUBLIC_MAINNET_UPLOAD_RELAY ??
       "https://upload-relay.mainnet.walrus.space",

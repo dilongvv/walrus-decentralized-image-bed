@@ -21,7 +21,7 @@ export function createWalrusClient(network: WalrusNetwork) {
     ([{ SuiGrpcClient }, { walrus }]) =>
       new SuiGrpcClient({
         network,
-        baseUrl: config.fullnodeUrl
+        baseUrl: config.grpcUrl
       }).$extend(
         walrus({
           wasmUrl: WALRUS_WASM_CDN,

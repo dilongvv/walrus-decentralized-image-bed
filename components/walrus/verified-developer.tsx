@@ -1,6 +1,6 @@
 "use client";
 
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, ExternalLink, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   explorerUrl,
   isConfigured
 } from "@/lib/identity";
+import { getAppProfile } from "@/lib/sui-graphql";
 import { shortenAddress } from "@/lib/utils";
 
 export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
@@ -21,21 +22,14 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
   const hasProfile = isConfigured(ids.appProfileId);
   const hasPackage = isConfigured(ids.packageId);
 
-  const profileQuery = useSuiClientQuery(
-    "getObject",
-    {
-      id: ids.appProfileId ?? "",
-      options: {
-        showContent: true
-      }
-    },
-    {
-      enabled: hasProfile && Boolean(ids.appProfileId),
-      staleTime: 30_000
-    }
-  );
+  const profileQuery = useQuery({
+    queryKey: ["app-profile", network, ids.appProfileId],
+    queryFn: () => getAppProfile({ network, objectId: ids.appProfileId ?? "" }),
+    enabled: hasProfile && Boolean(ids.appProfileId),
+    staleTime: 30_000
+  });
 
-  const profileFields = extractProfileFields(profileQuery.data);
+  const profileFields = profileQuery.data;
   const developerWallet = profileFields?.developer ?? DEVELOPER_WALLET;
   const website = profileFields?.website_url ?? PROJECT_WEBSITE;
   const github = profileFields?.github_url ?? PROJECT_GITHUB;
@@ -92,6 +86,12 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
       {profileQuery.isFetching ? (
         <p className="mt-3 text-xs text-muted-foreground">Refreshing on-chain profile data...</p>
       ) : null}
+      {profileQuery.isError ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          On-chain profile could not be refreshed through GraphQL; showing configured fallback
+          values.
+        </p>
+      ) : null}
 
       <div className="mt-4 flex items-start gap-2 rounded-md border border-white/10 bg-background/70 p-3 text-xs leading-5 text-muted-foreground">
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -103,34 +103,6 @@ export function VerifiedDeveloper({ network }: { network: WalrusNetwork }) {
       </div>
     </section>
   );
-}
-
-function extractProfileFields(data: unknown) {
-  if (!data || typeof data !== "object") return null;
-
-  const object = data as {
-    data?: {
-      content?: {
-        fields?: Record<string, unknown>;
-      };
-    };
-  };
-
-  const fields = object.data?.content?.fields;
-  if (!fields) return null;
-
-  return {
-    developer:
-      typeof fields.developer === "string" && fields.developer.trim() ? fields.developer : undefined,
-    website_url:
-      typeof fields.website_url === "string" && fields.website_url.trim()
-        ? fields.website_url
-        : undefined,
-    github_url:
-      typeof fields.github_url === "string" && fields.github_url.trim() ? fields.github_url : undefined,
-    suins_name:
-      typeof fields.suins_name === "string" && fields.suins_name.trim() ? fields.suins_name : undefined
-  };
 }
 
 function IdentityRow({
