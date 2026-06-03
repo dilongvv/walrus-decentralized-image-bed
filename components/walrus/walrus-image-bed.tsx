@@ -18,6 +18,7 @@ import {
   DEFAULT_EPOCHS,
   MAX_FILE_SIZE,
   NETWORKS,
+  STORAGE_EPOCH_OPTIONS,
   type WalrusNetwork
 } from "@/lib/constants";
 import { readUploadHistory, saveUploadRecord, updateUploadRecord } from "@/lib/history";
@@ -45,6 +46,11 @@ export function WalrusImageBed() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [storageEpochs, setStorageEpochs] = useState(
+    STORAGE_EPOCH_OPTIONS.includes(DEFAULT_EPOCHS as (typeof STORAGE_EPOCH_OPTIONS)[number])
+      ? DEFAULT_EPOCHS
+      : STORAGE_EPOCH_OPTIONS[0]
+  );
   const [extendEpochs, setExtendEpochs] = useState(DEFAULT_EPOCHS);
   const [isExtending, setIsExtending] = useState(false);
 
@@ -125,6 +131,7 @@ export function WalrusImageBed() {
         file: selectedFile,
         address: account.address,
         network,
+        epochs: storageEpochs,
         signAndExecute: signAndExecuteTransaction,
         onProgress: (nextProgress, message) => {
           setProgress(nextProgress);
@@ -163,7 +170,7 @@ export function WalrusImageBed() {
         proof: {
           registerDigest: uploaded.registerDigest,
           certifyDigest: uploaded.certifyDigest,
-          epochs: DEFAULT_EPOCHS,
+          epochs: storageEpochs,
           startEpoch: uploaded.storage?.start_epoch,
           endEpoch: uploaded.storage?.end_epoch,
           storageSize: uploaded.storage?.storage_size,
@@ -276,6 +283,8 @@ export function WalrusImageBed() {
               phase={phase}
               progress={progress}
               statusText={statusText}
+              storageEpochs={storageEpochs}
+              onStorageEpochsChange={setStorageEpochs}
               onSelectFile={selectFile}
               onClear={clearFile}
               onUpload={handleUpload}

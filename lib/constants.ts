@@ -74,6 +74,8 @@ export const DEFAULT_NETWORK: WalrusNetwork =
 
 export const DEFAULT_EPOCHS = Number(process.env.NEXT_PUBLIC_WALRUS_EPOCHS ?? 3);
 
+export const STORAGE_EPOCH_OPTIONS = [3, 10, 30, 53] as const;
+
 export const WALRUS_RELAY_TIP_MAX = Number(
   process.env.NEXT_PUBLIC_WALRUS_RELAY_TIP_MAX ?? 10_000_000
 );

@@ -4,7 +4,14 @@ import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import { FileUp, ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ACCEPTED_MIME_TYPES, MAX_FILE_SIZE } from "@/lib/constants";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { ACCEPTED_MIME_TYPES, MAX_FILE_SIZE, STORAGE_EPOCH_OPTIONS } from "@/lib/constants";
 import type { UploadPhase } from "@/lib/types";
 import { cn, formatBytes } from "@/lib/utils";
 
@@ -14,6 +21,8 @@ type UploadDropzoneProps = {
   phase: UploadPhase;
   progress: number;
   statusText: string;
+  storageEpochs: number;
+  onStorageEpochsChange: (epochs: number) => void;
   onSelectFile: (file: File) => void;
   onClear: () => void;
   onUpload: () => void;
@@ -25,6 +34,8 @@ export function UploadDropzone({
   phase,
   progress,
   statusText,
+  storageEpochs,
+  onStorageEpochsChange,
   onSelectFile,
   onClear,
   onUpload
@@ -118,6 +129,33 @@ export function UploadDropzone({
               </div>
 
               <div className="space-y-3">
+                <div
+                  className="grid gap-2 rounded-md border border-white/10 bg-background/70 p-3 sm:max-w-xs"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Storage duration
+                  </label>
+                  <Select
+                    value={String(storageEpochs)}
+                    onValueChange={(value) => onStorageEpochsChange(Number(value))}
+                    disabled={isBusy}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STORAGE_EPOCH_OPTIONS.map((epochs) => (
+                        <SelectItem key={epochs} value={String(epochs)}>
+                          {epochs} epochs
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    Longer duration costs more WAL.
+                  </p>
+                </div>
                 {phase !== "idle" ? (
                   <div className="space-y-2">
                     <Progress value={progress} />

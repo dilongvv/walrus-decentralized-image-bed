@@ -3,7 +3,6 @@
 import type { Transaction } from "@mysten/sui/transactions";
 import {
   CANONICAL_AGGREGATOR_BASE,
-  DEFAULT_EPOCHS,
   NETWORKS,
   WALRUS_RELAY_TIP_MAX,
   type WalrusNetwork
@@ -101,12 +100,14 @@ export async function uploadFileToWalrus({
   file,
   address,
   network,
+  epochs,
   signAndExecute,
   onProgress
 }: {
   file: File;
   address: string;
   network: WalrusNetwork;
+  epochs: number;
   signAndExecute: SignAndExecute;
   onProgress: (progress: number, message: string) => void;
 }) {
@@ -138,7 +139,7 @@ export async function uploadFileToWalrus({
 
   onProgress(35, "Registering storage on Sui...");
   const registerTx = flow.register({
-    epochs: DEFAULT_EPOCHS,
+    epochs,
     owner: address,
     deletable: true
   });
