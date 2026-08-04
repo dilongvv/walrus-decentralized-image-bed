@@ -141,8 +141,6 @@ Open http://localhost:3000.
 NEXT_PUBLIC_SUI_NETWORK=mainnet
 NEXT_PUBLIC_WALRUS_EPOCHS=3
 NEXT_PUBLIC_WALRUS_RELAY_TIP_MAX=10000000
-NEXT_PUBLIC_TESTNET_FULLNODE=https://fullnode.testnet.sui.io:443
-NEXT_PUBLIC_MAINNET_FULLNODE=https://fullnode.mainnet.sui.io:443
 NEXT_PUBLIC_TESTNET_GRAPHQL=https://graphql.testnet.sui.io/graphql
 NEXT_PUBLIC_MAINNET_GRAPHQL=https://graphql.mainnet.sui.io/graphql
 NEXT_PUBLIC_TESTNET_GRPC=https://fullnode.testnet.sui.io:443
@@ -248,8 +246,8 @@ npm run build
 ## Notes
 
 Sui data access is split by workload. The verified developer panel reads the on-chain AppProfile
-through Sui GraphQL RPC. Walrus upload and storage extension flows use `SuiGrpcClient`. The dApp Kit
-provider still keeps `NEXT_PUBLIC_*_FULLNODE` as a wallet compatibility layer for network context.
+through Sui GraphQL RPC. Wallet transaction serialization/execution and Walrus upload/storage
+extension flows use `SuiGrpcClient`; the app no longer depends on public JSON-RPC fullnodes.
 
 The upload implementation lives in `lib/walrus.ts`. It uses `SuiGrpcClient` plus the Walrus extension and configures `uploadRelay.host` per selected network. The UI calls `writeFilesFlow`, then executes:
 

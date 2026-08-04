@@ -7,6 +7,7 @@ import {
   useSignAndExecuteTransaction,
   useSuiClientContext
 } from "@mysten/dapp-kit";
+import { fromBase64 } from "@mysten/sui/utils";
 import { Header } from "@/components/walrus/header";
 import { HistoryList } from "@/components/walrus/history-list";
 import { StatusMessage } from "@/components/walrus/status-message";
@@ -26,6 +27,7 @@ import type { UploadPhase, UploadRecord } from "@/lib/types";
 import { getErrorMessage } from "@/lib/utils";
 import {
   buildWalrusFileUrls,
+  createWalrusClient,
   extendWalrusBlobStorage,
   uploadFileToWalrus
 } from "@/lib/walrus";
@@ -33,9 +35,25 @@ import {
 export function WalrusImageBed() {
   const account = useCurrentAccount();
   const suiContext = useSuiClientContext();
-  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-
   const network = suiContext.network as WalrusNetwork;
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction({
+    execute: async ({ bytes, signature }) => {
+      const client = await createWalrusClient(network);
+      const result = await client.executeTransaction({
+        transaction: fromBase64(bytes),
+        signatures: [signature]
+      });
+
+      if (result.$kind === "FailedTransaction") {
+        throw new Error(
+          result.FailedTransaction.status.error?.message ?? "Transaction execution failed."
+        );
+      }
+
+      return { digest: result.Transaction.digest };
+    }
+  });
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string>();
   const [records, setRecords] = useState<UploadRecord[]>([]);
